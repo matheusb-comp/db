@@ -1,0 +1,3 @@
+pgsql_data/
+mysql_data/
+.env
