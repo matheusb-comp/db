@@ -17,15 +17,15 @@ password from the `.env` file, that is not versioned. To create it, run:
 cp .env.example .env
 ```
 
-Then to start the `stack`, run:
+Then to start the `stack`, run the script:
 
 ```
-./start.sh
+./start
 ```
 
 ## Stop
 
-To stop the `stack`, use the docker command directly:
+To stop the `stack`, use the Docker command directly:
 
 ```
 docker stack rm db
