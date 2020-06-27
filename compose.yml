@@ -1,0 +1,69 @@
+version: "3.8"
+
+# Create a custom overlay network for this stack
+networks:
+  db:
+    driver: overlay
+    # Allow other containers to attach to this network
+    attachable: true
+
+services:
+  # Database management UI
+  adminer:
+    image: adminer:latest
+    init: true
+    user: "${USER_ID:-0}:${USER_GROUP:-0}"
+    ports:
+      - "8999:8080"
+    environment:
+      ADMINER_DESIGN: "${ADMINER_DESIGN}"
+      # https://hub.docker.com/_/adminer/#usage-with-external-server
+      ADMINER_DEFAULT_SERVER: pgsql
+      # Pre-fill the login form with the database values using a plugin:
+      # github.com/TimWolla/docker-adminer/issues/13#issuecomment-325669588
+      ADMINER_DEFAULT_DRIVER: pgsql
+      ADMINER_DEFAULT_USER: "${DB_USER}"
+      ADMINER_DEFAULT_PASSWORD: "${DB_PASS}"
+    volumes:
+      - "./config/adminer/fill-login-form.php:\
+        /var/www/html/plugins-enabled/fill-login-form.php:ro"
+    networks:
+      - db
+
+  # PostgreSQL database service
+  pgsql:
+    image: postgres:alpine
+    init: true
+    user: "${USER_ID:-0}:${USER_GROUP:-0}"
+    ports:
+      - "${DB_PGSQL_PORT}:5432"
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASS}"
+    volumes:
+      - "/etc/passwd:/etc/passwd:ro"
+      - "./pgsql_data:/var/lib/postgresql/data"
+    networks:
+      - db
+    deploy:
+      replicas: "${DB_START_PGSQL:-1}"
+
+  # Mysql database service
+  mysql:
+    image: mysql:latest
+    init: true
+    command: --default-authentication-plugin=mysql_native_password
+    user: "${USER_ID:-0}:${USER_GROUP:-0}"
+    ports:
+      - "${DB_MYSQL_PORT}:3306"
+    environment:
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASS}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASS}"
+    volumes:
+      - "/etc/passwd:/etc/passwd:ro"
+      - "./mysql_data:/var/lib/mysql"
+    networks:
+      - db
+    deploy:
+      replicas: "${DB_START_MYSQL:-0}"
