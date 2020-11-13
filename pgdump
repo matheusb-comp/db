@@ -1,0 +1,28 @@
+#!/bin/sh
+
+PGPASSFILEPATH=${PGPASSFILE:-~/.pgpass}
+if [ ! -e "${PGPASSFILEPATH}" ]; then
+  echo "No credentials file found." >&2
+  echo "See https://www.postgresql.org/docs/current/libpq-pgpass.html" >&2
+  exit 1
+fi
+
+FILENAME="/dumps/$(date -Iseconds).dump"
+docker run --rm \
+  --user "$(id -u):$(id -g)" \
+  -v "$(pwd)/pgsql_dumps:/dumps" \
+  -v "${PGPASSFILEPATH}:/.pgpass:ro" \
+  -e "PGPASSFILE=/.pgpass" \
+  -e "PGDATABASE=$1" \
+  --env-file "$(pwd)/.env" \
+  --entrypoint "sh" \
+  postgres:alpine -c \
+    'pg_dump \
+      -h 172.17.0.1 \
+      -U $DB_USER \
+      --format=custom \
+      --compress=9 \
+      --no-owner \
+      --no-privileges \
+      --verbose \
+      > /dumps/${PGDATABASE:-$DB_USER}_$(date -Iseconds).dump'
