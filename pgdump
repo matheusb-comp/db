@@ -7,7 +7,6 @@ if [ ! -e "${PGPASSFILEPATH}" ]; then
   exit 1
 fi
 
-FILENAME="/dumps/$(date -Iseconds).dump"
 docker run --rm \
   --user "$(id -u):$(id -g)" \
   -v "$(pwd)/pgsql_dumps:/dumps" \
