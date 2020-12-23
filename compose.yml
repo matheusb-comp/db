@@ -25,14 +25,17 @@ services:
       ADMINER_DEFAULT_USER: "${DB_USER}"
       ADMINER_DEFAULT_PASSWORD: "${DB_PASS}"
     volumes:
+      - "./sqlite_data:/var/www/html/sqlite"
       - "./config/adminer/fill-login-form.php:\
         /var/www/html/plugins-enabled/fill-login-form.php:ro"
+      - "./config/adminer/login-password-less.php:\
+        /var/www/html/plugins-enabled/login-password-less.php:ro"
     networks:
       - db
 
   # PostgreSQL database service
   pgsql:
-    image: postgres:alpine
+    image: postgres:${DB_PGSQL_VERSION}
     init: true
     user: "${USER_ID:-0}:${USER_GROUP:-0}"
     ports:
@@ -50,7 +53,7 @@ services:
 
   # Mysql database service
   mysql:
-    image: mysql:latest
+    image: mysql:${DB_MYSQL_VERSION}
     init: true
     command: --default-authentication-plugin=mysql_native_password
     user: "${USER_ID:-0}:${USER_GROUP:-0}"
