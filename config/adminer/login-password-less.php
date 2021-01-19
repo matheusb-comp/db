@@ -9,5 +9,5 @@ require_once('plugins/login-password-less.php');
 	* @param string result of password_hash
 	*/
 return new AdminerLoginPasswordLess(
-	$password_hash = password_hash('null', PASSWORD_DEFAULT)
+    $password_hash = password_hash('null', PASSWORD_DEFAULT)
 );
